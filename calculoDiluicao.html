@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo diluição</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+
+    <style>
+        body {
+            background-color: white;
+            font-family: Roboto, sans-serif;
+            color: #696969;
+        }
+
+        .title {
+            text-align: center;
+        }
+
+        .center {
+            margin: auto;
+            width: 95%;
+            padding: 10px;
+        }
+
+        .form-field {
+            margin-top: 20px
+        }
+
+        label, .bold  {
+            font-weight: 700;
+        }
+
+        .result {
+            padding: 16px;
+            border: 3px solid #1C6EA4;
+            border-radius: 16px; 
+        }
+
+        .button {
+            padding: 0 50px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }        
+    </style>
+</head>
+<body>
+
+    <div class="w3-container w3-blue title">
+        <h2>Cálculo de diluição de sêmen</h2>
+    </div>
+
+    <div class="center">
+
+        <div>
+
+            <form id="calculo-diluicao" class="w3-container">
+
+                <div class="form-field">
+                    <label>Animal</label>
+                    <select id="animal" class="w3-input">
+                        <option value="0">Equino, cão ou suíno</option>
+                        <option value="1">Outros</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label>Concentração (espermatozoides/ml)</label>
+                    <input required id="concentracao" class="w3-input" type="text"/>
+                </div>
+
+                <div class="form-field">
+                    <label>Volume (ml)</label>
+                    <input required id="volume" class="w3-input" type="text"/>
+                </div>
+
+                <div class="form-field">
+                    <label>MPR (0 - 1)</label>
+                    <input required id="mpr" class="w3-input" type="text"/>
+                </div>
+
+                <div class="form-field">
+                    <label>Dose inseminante (ml)</label>
+                    <input required id="dose" class="w3-input" type="text"/>
+                </div>
+
+                <div class="form-field">
+                    <label>Perda pós descongelação (0 - 1)</label>
+                    <input required id="perda" class="w3-input" type="text" value="0.5"/>
+                </div>
+
+                <div class="form-field">
+                    <label>Volume da palheta (ml)</label>
+                    <input required id="palheta" class="w3-input" type="text" value="0.5"/>
+                </div>
+
+                <div class="form-field button">
+                    <button type="submit" id="calculate" class="w3-input w3-blue">
+                        Calcular
+                    </button>
+                </div>
+            </form>
+
+        </div>
+
+        <div class="form-field title bold">
+            <div class="result">Volume de Diluidor: <span id="volume-diluidor">0</span> ml</div>
+        </div>
+
+    </div>
+
+
+    <script>
+
+        function getTotalSperms(concentracao, volume) {
+            return concentracao * volume;
+        }
+
+        function getViableSperms(totalSperms, mpr) {
+            return totalSperms * mpr;
+        }
+
+        function getUnfrozedViableSperms(viableSperms, perda) {
+            return viableSperms * perda;
+        }
+
+        function getNumberOfDoses(unfrozedViableSperms, dose) {
+            return Math.trunc(unfrozedViableSperms / dose);
+        }
+
+        function getTotalBladeVolume(numberOfDoses, bladeVolume) {
+            return numberOfDoses * bladeVolume;
+        }
+
+        function getTotalDilutingVolume(totalBladeVolume, volume, animal) {
+            return totalBladeVolume - (animal == 0 ? volume/100 : volume);
+        }
+
+        $("#calculate").on('click', (e) => {
+
+            if(!$(e.target).closest('form')[0].checkValidity()) {
+                return;
+            };
+
+            e.preventDefault();
+            const animal = $("#animal").val();
+            const concentracao = $("#concentracao").val();
+            const volume = $("#volume").val();
+            const mpr = $("#mpr").val();
+            const dose = $("#dose").val();
+            const perda = $("#perda").val();
+            const bladeVolume = $("#palheta").val();
+
+            const totalSperms = getTotalSperms(concentracao, volume);
+            const viableSperms = getViableSperms(totalSperms, mpr);
+            const unfrozedViableSperms = getUnfrozedViableSperms(viableSperms, perda);
+            const numberOfDoses = getNumberOfDoses(unfrozedViableSperms, dose);
+            const totalBladeVolume = getTotalBladeVolume(numberOfDoses, bladeVolume);
+            const totalDilutingVolume = getTotalDilutingVolume(totalBladeVolume, volume, animal);
+
+            $("#volume-diluidor").html(totalDilutingVolume);
+        });
+    </script>
+</body>
+</html>
